@@ -1,7 +1,6 @@
 package lukianol.tictactoe.in2d;
 
 import lukianol.tictactoe.Field;
-
 import lukianol.tictactoe.Game;
 import lukianol.tictactoe.GameEventListener;
 import lukianol.tictactoe.GameState;
@@ -11,86 +10,96 @@ import lukianol.tictactoe.StrokeKind;
 import lukianol.tictactoe.TicTacToeException;
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class TicTacToe2DActivity extends Activity implements DrawView.OnPositionTouchEventListener,
-GameEventListener {
-    
-    
+public class TicTacToe2DActivity extends Activity 
+	implements DrawView.OnPositionTouchEventListener
+	, GameEventListener {
+        
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	
         super.onCreate(savedInstanceState);
         
-        init();
+        initializeActivity();
     }
     
-    private void init(){
-    	
-    	setContentView(R.layout.main);        
-                
-        _stroke = (TextView)findViewById(R.id.stroke);
-        
-        Button newGame = (Button)findViewById(R.id.newGame); 
-        final TicTacToe2DActivity _this = this;
-    	newGame.setOnClickListener(new View.OnClickListener() {
+	public Boolean OnPositionTouch(View view, Position position) {
+		
+		try 
+		{
+			_game.Stroke(position);						
 			
-			public void onClick(View v) {
-				if (_game != null)
-					_game.removeGameEventListener(_this);
-				_game = new Game(_this, playGroundSize);
-				drawView.clearSurface();
-			}
-		});
-    	
-    	_game = new Game(this, playGroundSize);
-        drawView = new DrawView(this, playGroundSize, false); 
-        drawView.setOnPositionTouchEventListener(this);      
-        LinearLayout layout = (LinearLayout)findViewById(R.id.root);
-        layout.addView(drawView);
-    }
-    
-    public Boolean OnPositionTouch(View view, Position position) {
-		try {
-			
-			StrokeKind stroke = _game.getCurrentStroke();
-			_game.Stroke(position);
-			drawView.addStroke(position, stroke);
-			return true;
-			
-		} catch (TicTacToeException e) {
-    	
-    		e.printStackTrace();
-    		return false;
+		} 
+		catch (TicTacToeException e) 
+		{
+    		Log.e(_className, "(!)", e);    		
     	}
 		
+		return true;		
+		
+	}
+
+	public void onFieldStroked(IGame game, Field field) {
+		_drawView.addStroke(field.getPosition(), field.getStroke());		
 	}
 	
-	public void GameStateChanged(IGame game, GameState gameState) {
+	public void onGameStateChanged(IGame game, GameState gameState) {
 		
 		switch(gameState){
-			case Won:
-				Field[] fields = game.getWonFields();
-				Position[] positions = new Position[fields.length];
-				int index = 0;
-				for(Field field : game.getWonFields()){
-					positions[index++] = field.getPosition();
-				}
-				drawView.setWonStrokePositions(positions);
-				break;
+		
+		case Playing:
+			_drawView.clearSurface();
+			break;
+	
+		case Won:
+			_drawView.setWonStrokePositions(game.getWonPositions());
+			break;
 		}
 		
 	}
 
-	public void CurrentStrokeChanged(IGame game, StrokeKind stroke) {
-		_stroke.setText(stroke.toString().toUpperCase());
+	public void onCurrentStrokeChanged(IGame game, StrokeKind stroke) {
+		_currentStrokeDisplay.setText(stroke.toString().toUpperCase());
 	}	
-
-	private DrawView drawView;
+	
+    private void initializeActivity(){
+    	
+    	setContentView(R.layout.main);
+        _currentStrokeDisplay = (TextView)findViewById(R.id.stroke);
+        Button newGame = (Button)findViewById(R.id.newGame); 
+        
+    	newGame.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				createNewGame();
+			}
+		});
+    	
+    	_drawView = new DrawView(this, playgroundSize);         
+        _drawView.setOnPositionTouchEventListener(this);
+    	
+    	createNewGame();
+    	    	
+    	ViewGroup layout = (ViewGroup)findViewById(R.id.root);
+        layout.addView(_drawView, 0);
+    }
+           
+    private void createNewGame() {
+    	
+    	if (_game != null)
+			_game.dispose();   
+    	
+		_game = new Game(this, playgroundSize);		
+    }
+    
+    private DrawView _drawView;
 	private Game _game;
-	private final int playGroundSize = 3;
-	private TextView _stroke;
+	private TextView _currentStrokeDisplay;
+	private static final String _className = TicTacToe2DActivity.class.getName();
+	private static final int playgroundSize = Game.DefaultPlaygroundSize;
+	
 }

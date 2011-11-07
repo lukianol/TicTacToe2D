@@ -18,9 +18,13 @@ import android.view.View;
 
 public final class DrawView extends View {
 
+	public DrawView(Context context, int playgroundSize) {
+		this(context, playgroundSize, false);
+	}
 	
 	public DrawView(Context context, int playgroundSize, Boolean debugMode) {
 		super(context);	
+		
 		_debugMode = debugMode;
 		
 		_strokesPaint = _linesPaint = new Paint();
@@ -28,12 +32,14 @@ public final class DrawView extends View {
 		_linesPaint.setStrokeWidth(10);
 		_linesPaint.setStrokeCap(Cap.ROUND);
 		_linesPaint.setStyle(Style.STROKE);
+		_linesPaint.setAntiAlias(true);
 		
 		_wonPaint = new Paint();
-		_wonPaint.setColor(Color.RED);
+		_wonPaint.setARGB(225, 255, 0, 0);
 		_wonPaint.setStrokeWidth(20);
 		_wonPaint.setStrokeCap(Cap.ROUND);
 		_wonPaint.setStyle(Style.STROKE);
+		_wonPaint.setAntiAlias(true);
 		
 		_backgroundPaint = new Paint();
 		_backgroundPaint.setColor(Color.BLACK);
@@ -59,13 +65,23 @@ public final class DrawView extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		
-		Position position = getPosition(event);
+		if (!this.hasWonPositions())
+			switch(event.getAction()){
+			
+			case MotionEvent.ACTION_DOWN:
+				return true;
+				
+			case MotionEvent.ACTION_UP:
+				Position position = getPosition(event);			
+				if (position != null)
+					return invokeOnPositionTouchEventListener(position);	
+				break;
+				
+			default:
+				return super.onTouchEvent(event);			
+			}
 		
-		if (position != null){
-			return invokeOnPositionTouchEventListener(position);			 
-		}
-		
-		return super.onTouchEvent(event);
+		return super.onTouchEvent(event);		
 	}
 
 	public void setOnPositionTouchEventListener(OnPositionTouchEventListener listener){
@@ -81,7 +97,7 @@ public final class DrawView extends View {
 		_wonPositions = positions;
 		invalidate();
 	}
-
+	
 	public void clearSurface(){
 		_positionToStrokeKindMap.clear();
 		_wonPositions = null;	
@@ -93,6 +109,7 @@ public final class DrawView extends View {
 			
 		initSurfaceBox();	
 		drawBackground(canvas);
+		drawView(canvas);
 		drawSurfaceBox(canvas);
 		drawVerticalLines(canvas);		
 		drawHorizontalLines(canvas);
@@ -100,13 +117,50 @@ public final class DrawView extends View {
 		drawWonPositions(canvas);
 	}
 	
+	private void drawView(Canvas canvas){
+		if (this._debugMode)
+			canvas.drawRect(0, 0, this.getWidth(), this.getHeight(), this._debugBorderPaint);
+	}
+	
 	private void drawWonPositions(Canvas canvas){
 		
-		if (_wonPositions != null){
+		if (hasWonPositions()){
+
+			RectF start = _positionToFieldMap.get(_wonPositions[0]);
+			RectF end = _positionToFieldMap.get(_wonPositions[_wonPositions.length - 1]);
 			
-			RectF start = this._positionToFieldMap.get(_wonPositions[0]);
-			RectF end = this._positionToFieldMap.get(_wonPositions[_wonPositions.length - 1]);
-			canvas.drawLine(start.centerX(), start.centerY(), end.centerX(), end.centerY(), this._wonPaint);
+			RectF finalRect = new RectF(start);
+			finalRect.union(end);
+			float finalHeight = finalRect.height();
+			float finalWidth = finalRect.width();
+			float startX, startY, stopX, stopY;
+			 
+			if ( finalHeight == finalWidth ) 							
+				if (start.centerX() < end.centerX()){
+					startX = finalRect.left;
+					startY = finalRect.top;
+					stopX = finalRect.right;
+					stopY = finalRect.bottom;
+				} else {
+					startX = finalRect.right;
+					startY = finalRect.top;
+					stopX = finalRect.left;
+					stopY = finalRect.bottom;
+				}
+			else if (finalHeight > finalWidth){
+				startX = finalRect.centerX();
+				startY = finalRect.top;
+				stopX = startX;
+				stopY = finalRect.bottom;
+			}
+			else {
+				startX = finalRect.left;
+				startY = finalRect.centerY();
+				stopX = finalRect.right;
+				stopY = startY;
+			}
+			
+			canvas.drawLine(startX, startY, stopX, stopY, this._wonPaint);
 			
 		}
 		
@@ -132,9 +186,10 @@ public final class DrawView extends View {
 	
 	private Position getPosition(MotionEvent event) {
 		
-		for(Map.Entry<Position, RectF> field : _positionToFieldMap.entrySet())			
-			if (field.getValue().contains(event.getX(), event.getY()))
-				return field.getKey();
+		if (_positionToFieldMap != null)
+			for(Map.Entry<Position, RectF> field : _positionToFieldMap.entrySet())			
+				if (field.getValue().contains(event.getX(), event.getY()))
+					return field.getKey();
 		
 		return null;		
 	}
@@ -267,6 +322,10 @@ public final class DrawView extends View {
 				field.bottom = field.top + fieldHeight;
 				_positionToFieldMap.put(position, field);
 			}
+	}
+	
+	private Boolean hasWonPositions(){
+		return _wonPositions != null;
 	}
 	
 	private final Paint _debugBorderPaint;
