@@ -69,12 +69,9 @@ public final class DrawView extends View {
 			switch(event.getAction()){
 			
 			case MotionEvent.ACTION_DOWN:
-				return true;
-				
-			case MotionEvent.ACTION_UP:
 				Position position = getPosition(event);			
 				if (position != null)
-					return invokeOnPositionTouchEventListener(position);	
+					return invokeOnPositionTouchEventListener(position);
 				break;
 				
 			default:
