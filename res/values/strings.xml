@@ -2,5 +2,8 @@
 <resources>
     <string name="app_name">TicTacToe in 2D</string>
     <string name="newGame">New Game</string>
+    <string name="aboutApp">About</string>
+    <string name="aboutMessageF" formatted="false">%s was created by %s</string>
+    <string name="author">Oleksandr Lukiantsev</string>
 
 </resources>

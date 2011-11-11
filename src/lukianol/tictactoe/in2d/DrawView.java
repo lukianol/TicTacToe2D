@@ -65,7 +65,7 @@ public final class DrawView extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		
-		if (!this.hasWonPositions())
+		if (this._isInited && !this.hasWonPositions())
 			switch(event.getAction()){
 			
 			case MotionEvent.ACTION_DOWN:
@@ -95,26 +95,30 @@ public final class DrawView extends View {
 		invalidate();
 	}
 	
-	public void clearSurface(){
+	public void initSurface(){
 		_positionToStrokeKindMap.clear();
 		_wonPositions = null;	
+		_isInited = true;
 		invalidate();
 	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {		
-			
+		
+		if (!this._isInited)	
+			return;
+		
 		initSurfaceBox();	
 		drawBackground(canvas);
-		drawView(canvas);
-		drawSurfaceBox(canvas);
+		debugDrawView(canvas);
+		debugDrawSurfaceBox(canvas);
 		drawVerticalLines(canvas);		
 		drawHorizontalLines(canvas);
 		drawStrokes(canvas);
 		drawWonPositions(canvas);
 	}
 	
-	private void drawView(Canvas canvas){
+	private void debugDrawView(Canvas canvas){
 		if (this._debugMode)
 			canvas.drawRect(0, 0, this.getWidth(), this.getHeight(), this._debugBorderPaint);
 	}
@@ -259,7 +263,7 @@ public final class DrawView extends View {
 		
 	}
 
-	private void drawSurfaceBox(Canvas canvas){
+	private void debugDrawSurfaceBox(Canvas canvas){
 		if (_debugMode)
 			canvas.drawRect(_surfaceBox, this._debugBorderPaint);
 	}
@@ -341,6 +345,7 @@ public final class DrawView extends View {
 	private OnPositionTouchEventListener _onPositionTouchListener;
 	private final Map<Position, StrokeKind> _positionToStrokeKindMap = new HashMap<Position, StrokeKind>();
 	private Position[] _wonPositions;
+	private boolean _isInited = false;
 	
 	public interface OnPositionTouchEventListener {
 		public abstract Boolean OnPositionTouch(View view, Position position);
