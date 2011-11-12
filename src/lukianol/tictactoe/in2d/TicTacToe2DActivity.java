@@ -46,7 +46,7 @@ public class TicTacToe2DActivity extends Activity
 		} 
 		catch (TicTacToeException e) 
 		{
-    		Log.e(_className, "(!)", e);    		
+    		Log.e(_className, "(!)", e);
     	}
 		
 		return true;		
@@ -84,7 +84,7 @@ public class TicTacToe2DActivity extends Activity
 	}
 
 	public void onCurrentStrokeChanged(IGame game, StrokeKind stroke) {
-		_currentStrokeDisplay.setText(stroke.toString().toUpperCase());
+		_currentStrokeDisplay.setText(String.format(getString(R.string.strokeLabel), stroke.toString().toUpperCase()));
 	}	
 	
 	@Override
@@ -127,7 +127,7 @@ public class TicTacToe2DActivity extends Activity
 	private Map<Integer, ICommandFactory> _commands = Collections.unmodifiableMap(new HashMap<Integer, ICommandFactory>(){
 				{
 					put(R.id.newGame, new NewGameCommand(TicTacToe2DActivity.this));
-					put(R.id.aboutApp, new AboutCommand(TicTacToe2DActivity.this));
+					put(R.id.aboutGame, new AboutCommand(TicTacToe2DActivity.this));
 				}
 			});
 	

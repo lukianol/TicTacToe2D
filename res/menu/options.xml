@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/newGame" android:checked="false" android:menuCategory="system" android:visible="true" android:title="@string/newGame" android:checkable="false" android:enabled="true"></item>
-    <item android:id="@+id/aboutApp" android:checked="false" android:menuCategory="system" android:visible="true" android:title="@string/aboutApp" android:checkable="false" android:enabled="true"></item>
+    <item android:id="@+id/aboutGame" android:checked="false" android:menuCategory="system" android:visible="true" android:title="@string/aboutGame" android:checkable="false" android:enabled="true"></item>
 
     
 
