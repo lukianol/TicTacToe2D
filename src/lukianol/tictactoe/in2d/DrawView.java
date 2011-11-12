@@ -1,5 +1,6 @@
 package lukianol.tictactoe.in2d;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ public final class DrawView extends View {
 		this(context, playgroundSize, false);
 	}
 	
+	@SuppressWarnings("serial")
 	public DrawView(Context context, int playgroundSize, Boolean debugMode) {
 		super(context);	
 		
@@ -58,8 +60,14 @@ public final class DrawView extends View {
 				
 		_size = playgroundSize;
 		
-		_hStrokeMarginPercent = _vStrokeMarginPercent = 0.2f;
 		_horizontalAreaMarginPercent = _verticalAreaMarginPercent = 0.05f;
+		
+		_strokeTiles = Collections.unmodifiableMap(new HashMap<StrokeKind, IStrokeTile>(2){
+			{
+				put(StrokeKind.X, new XStrokeTile(_strokesPaint, 0.2f, 0.2f));
+				put(StrokeKind.O, new OStrokeTile(_strokesPaint, 0.2f, 0.2f));
+			}
+		});
 	}
 	
 	@Override
@@ -170,7 +178,7 @@ public final class DrawView extends View {
 	private void drawStrokes(Canvas canvas) {
 		
 		for(Map.Entry<Position, StrokeKind> item : _positionToStrokeKindMap.entrySet()){
-			drawStroke(canvas, item.getValue(), item.getKey());
+			getStrokeTile(item.getValue()).Draw(canvas, _positionToFieldMap.get(item.getKey()));
 		}
 		
 	}
@@ -195,41 +203,8 @@ public final class DrawView extends View {
 		return null;		
 	}
 		
-	private void drawStroke(Canvas canvas, StrokeKind stroke, Position position){
-		switch(stroke){
-		case X:
-			drawXStroke(canvas, _positionToFieldMap.get(position));
-			break;
-		case O:
-			drawOStroke(canvas, _positionToFieldMap.get(position));
-			break;
-			default:
-				throw new UnsupportedOperationException();
-		}
-	}
-	
-	private void drawXStroke(Canvas canvas, RectF rect){
-		
-		float hMargin = getHStrokeMargin(rect);
-		float vMargin = getVStrokeMargin(rect);
-		
-		drawMarginedLine(canvas, rect.left, rect.top, rect.right, rect.bottom, hMargin, vMargin);
-		drawMarginedLine(canvas, rect.right, rect.top, rect.left, rect.bottom, -hMargin, vMargin);
-		
-	}
-	
-	private void drawMarginedLine(Canvas canvas, float startX, float startY, float stopX, float stopY, float hMargin, float vMargin){
-				
-		canvas.drawLine(startX + hMargin
-				, startY  + vMargin
-				, stopX - hMargin
-				, stopY - vMargin
-				, this._strokesPaint);		
-	}
-	
-	private void drawOStroke(Canvas canvas, RectF rect){
-		float radius = (Math.min(rect.width(), rect.height()) / 2) - Math.max(this.getHStrokeMargin(rect), this.getVStrokeMargin(rect));
-		canvas.drawCircle(rect.centerX(), rect.centerY(), radius, this._strokesPaint);
+	private IStrokeTile getStrokeTile(StrokeKind stroke) {
+		return _strokeTiles.get(stroke);
 	}
 	
 	private void drawBackground(Canvas canvas){		
@@ -281,14 +256,6 @@ public final class DrawView extends View {
 		int squarizer = ((height > width) ? height - width : 0);
 		return (Math.min(height, width) * _verticalAreaMarginPercent) + (squarizer / 2);
 	}
-
-	private float getHStrokeMargin(RectF rect){
-		return rect.width()*_hStrokeMarginPercent;
-	}
-	
-	private float getVStrokeMargin(RectF rect){
-		return rect.height()*_vStrokeMarginPercent;
-	}
 	
 	private float getFieldWidth(){
 		return this._surfaceBox.width() / this._size;
@@ -337,8 +304,6 @@ public final class DrawView extends View {
 	private final int _size;
 	private final float _horizontalAreaMarginPercent;
 	private final float _verticalAreaMarginPercent;
-	private final float _hStrokeMarginPercent;
-	private final float _vStrokeMarginPercent;
 	private RectF _surfaceBox;
 	private Map<Position, RectF> _positionToFieldMap;
 	private final Boolean _debugMode;
@@ -346,9 +311,78 @@ public final class DrawView extends View {
 	private final Map<Position, StrokeKind> _positionToStrokeKindMap = new HashMap<Position, StrokeKind>();
 	private Position[] _wonPositions;
 	private boolean _isInited = false;
+	private final Map<StrokeKind, IStrokeTile> _strokeTiles;
 	
 	public interface OnPositionTouchEventListener {
 		public abstract Boolean OnPositionTouch(View view, Position position);
+	}
+
+	interface IStrokeTile
+	{
+		public abstract void Draw(Canvas canvas, RectF rect);
+	}
+	
+	abstract class StrokeTileBase implements IStrokeTile
+	{
+		private float _hStrokeMarginPercent;
+		private float _vStrokeMarginPercent;
+		protected Paint _paint;
+		
+		protected StrokeTileBase(Paint paint, float hStrokeMarginPercent, float vStrokeMarginPercent){
+			_hStrokeMarginPercent = hStrokeMarginPercent;
+			_vStrokeMarginPercent = vStrokeMarginPercent;
+			_paint = paint;
+		}
+		
+		public abstract void Draw(Canvas canvas, RectF rect);
+
+		protected float getHStrokeMargin(RectF rect){
+			return rect.width()*_hStrokeMarginPercent;
+		}
+		
+		protected float getVStrokeMargin(RectF rect){
+			return rect.height()*_vStrokeMarginPercent;
+		}
+	}
+	
+	class XStrokeTile extends StrokeTileBase
+	{
+		public XStrokeTile(Paint paint, float hStrokeMarginPercent, float vStrokeMarginPercent) {
+			super(paint, hStrokeMarginPercent, vStrokeMarginPercent);			
+		}
+
+		@Override
+		public void Draw(Canvas canvas, RectF rect) {
+			
+			float hMargin = getHStrokeMargin(rect);
+			float vMargin = getVStrokeMargin(rect);
+			
+			drawMarginedLine(canvas, rect.left, rect.top, rect.right, rect.bottom, hMargin, vMargin);
+			drawMarginedLine(canvas, rect.right, rect.top, rect.left, rect.bottom, -hMargin, vMargin);
+		}
+		
+		private void drawMarginedLine(Canvas canvas, float startX, float startY, float stopX, float stopY, float hMargin, float vMargin){
+			
+			canvas.drawLine(startX + hMargin
+					, startY  + vMargin
+					, stopX - hMargin
+					, stopY - vMargin
+					, this._paint);		
+		}
+	}
+	
+	class OStrokeTile extends StrokeTileBase
+	{
+		protected OStrokeTile(Paint paint, float hStrokeMarginPercent,
+				float vStrokeMarginPercent) {
+			super(paint, hStrokeMarginPercent, vStrokeMarginPercent);			
+		}
+
+		@Override
+		public void Draw(Canvas canvas, RectF rect){
+			float radius = (Math.min(rect.width(), rect.height()) / 2) - Math.max(this.getHStrokeMargin(rect), this.getVStrokeMargin(rect));
+			canvas.drawCircle(rect.centerX(), rect.centerY(), radius, this._paint);
+		}
 	}
 	
 }

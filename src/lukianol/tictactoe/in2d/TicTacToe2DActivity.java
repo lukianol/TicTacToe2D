@@ -56,9 +56,9 @@ public class TicTacToe2DActivity extends Activity
 	public void onWindowFocusChanged(boolean hasFocus){
 		
 		super.onWindowFocusChanged(hasFocus);
-		if (hasFocus && !this._game.isPlaying())
-			this.openOptionsMenu();
 		
+		if (hasFocus && NullGame.equals(_game))
+			this.openOptionsMenu();		
 	}
 	
 	public void onFieldStroked(IGame game, Field field) {
@@ -67,7 +67,7 @@ public class TicTacToe2DActivity extends Activity
 	
 	public void onGameStateChanged(IGame game, GameState gameState) {
 		
-		switch(gameState){		
+		switch(gameState) {		
 		case Playing:
 			_drawView.initSurface();
 			break;	
@@ -89,7 +89,7 @@ public class TicTacToe2DActivity extends Activity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		MenuInflater inflater = this.getMenuInflater();
-		inflater.inflate(R.menu.options, menu);
+		inflater.inflate(R.menu.options, menu);		
 		return true;
 	}
 
