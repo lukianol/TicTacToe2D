@@ -1,4 +1,4 @@
-package lukianol.tictactoe.in2d;
+package lukianol.tictactoe.in2d.drawing;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -12,6 +12,7 @@ import lukianol.tictactoe.NullGame;
 import lukianol.tictactoe.Position;
 import lukianol.tictactoe.StrokeKind;
 import lukianol.tictactoe.TicTacToeException;
+import lukianol.tictactoe.in2d.drawing.DrawView;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
