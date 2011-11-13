@@ -40,14 +40,19 @@ public class TicTacToe2DActivity extends Activity
     
 	public Boolean OnPositionTouch(View view, Position position) {
 		
-		try 
+		if (!_game.isPlaying())
+			this.openOptionsMenu();
+		else
 		{
-			_game.Stroke(position);
-		} 
-		catch (TicTacToeException e) 
-		{
-    		Log.e(_className, "(!)", e);
-    	}
+			try 
+			{
+				_game.Stroke(position);
+			} 
+			catch (TicTacToeException e) 
+			{
+	    		Log.e(_className, "(!)", e);
+	    	}
+		}
 		
 		return true;		
 		
@@ -58,8 +63,11 @@ public class TicTacToe2DActivity extends Activity
 		
 		super.onWindowFocusChanged(hasFocus);
 		
-		if (hasFocus && NullGame.equals(_game))
+		if (hasFocus && !_windowHasFocusedFirstTime)
+		{
 			this.openOptionsMenu();		
+			_windowHasFocusedFirstTime = true;
+		}
 	}
 	
 	public void onFieldStroked(IGame game, Field field) {
@@ -122,12 +130,14 @@ public class TicTacToe2DActivity extends Activity
     private DrawView _drawView;	
 	private TextView _currentStrokeDisplay;
 	private static final String _className = TicTacToe2DActivity.class.getName();
+	private boolean _windowHasFocusedFirstTime = false;
 	
 	@SuppressWarnings("serial")
 	private Map<Integer, ICommandFactory> _commands = Collections.unmodifiableMap(new HashMap<Integer, ICommandFactory>(){
 				{
 					put(R.id.newGame, new NewGameCommand(TicTacToe2DActivity.this));
 					put(R.id.aboutGame, new AboutCommand(TicTacToe2DActivity.this));
+					put(R.id.exitGame, new ExitCommand(TicTacToe2DActivity.this));
 				}
 			});
 	

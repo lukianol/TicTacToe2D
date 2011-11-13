@@ -58,18 +58,18 @@ public final class DrawView extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		
-		if (this._isInited && !this.hasWonPositions())
-			switch(event.getAction()){
+		
+		switch(event.getAction()){
+		
+		case MotionEvent.ACTION_DOWN:
+			Position position = getPosition(event);			
+			if (position != null)
+				return invokeOnPositionTouchEventListener(position);
+			break;
 			
-			case MotionEvent.ACTION_DOWN:
-				Position position = getPosition(event);			
-				if (position != null)
-					return invokeOnPositionTouchEventListener(position);
-				break;
-				
-			default:
-				return super.onTouchEvent(event);			
-			}
+		default:
+			return super.onTouchEvent(event);			
+		}
 		
 		return super.onTouchEvent(event);		
 	}

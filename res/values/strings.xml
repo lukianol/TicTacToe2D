@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tic-Tac-Toe</string>
-    <string name="newGame">New Game</string>
-    <string name="aboutGame">About Game</string>
+    <string name="newGame">New</string>
+    <string name="aboutGame">About</string>
     <string name="aboutMessage" formatted="false">Tic-tac-toe is a pencil-and-paper game for two players, X and O, who take turns marking the spaces in a 3×3 grid. The X player goes first. The player who succeeds in placing three respective marks in a horizontal, vertical, or diagonal row wins the game. The implementation of the game was made by %s</string>
     <string name="author">Oleksandr Lukiantsev</string>
     <string name="buttonOK">Nice</string>
     <string name="strokeLabel" formatted="false">Player %s</string>
+    <string name="exitGame">Exit</string>
 
 </resources>
