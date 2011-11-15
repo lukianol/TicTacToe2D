@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import lukianol.tictactoe.Field;
 import lukianol.tictactoe.Game;
+import lukianol.tictactoe.GameBase;
 import lukianol.tictactoe.GameEventListener;
 import lukianol.tictactoe.GameState;
-import lukianol.tictactoe.IGame;
-import lukianol.tictactoe.NullGame;
 import lukianol.tictactoe.Position;
 import lukianol.tictactoe.StrokeKind;
 import lukianol.tictactoe.TicTacToeException;
@@ -70,11 +69,11 @@ public class TicTacToe2DActivity extends Activity
 		}
 	}
 	
-	public void onFieldStroked(IGame game, Field field) {
+	public void onFieldStroked(GameBase game, Field field) {
 		_drawView.addStroke(field.getPosition(), field.getStroke());		
 	}
 	
-	public void onGameStateChanged(IGame game, GameState gameState) {
+	public void onGameStateChanged(GameBase game, GameState gameState) {
 		
 		switch(gameState) {		
 		case Playing:
@@ -91,7 +90,7 @@ public class TicTacToe2DActivity extends Activity
 		
 	}
 
-	public void onCurrentStrokeChanged(IGame game, StrokeKind stroke) {
+	public void onCurrentStrokeChanged(GameBase game, StrokeKind stroke) {
 		_currentStrokeDisplay.setText(String.format(getString(R.string.strokeLabel), stroke.toString().toUpperCase()));
 	}	
 	
@@ -126,7 +125,7 @@ public class TicTacToe2DActivity extends Activity
         layout.addView(_drawView, 0);        
     }
 	
-	public IGame _game = NullGame.Instance;	
+	public GameBase _game = GameBase.Null;	
     private DrawView _drawView;	
 	private TextView _currentStrokeDisplay;
 	private static final String _className = TicTacToe2DActivity.class.getName();
