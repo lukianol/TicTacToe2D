@@ -183,17 +183,20 @@ public final class DrawView extends View {
 		
 		if (hasWonPositions()){
 
-			RectF start = _positionToFieldMap.get(_wonPositions[0]);
-			RectF end = _positionToFieldMap.get(_wonPositions[_wonPositions.length - 1]);
+			Position startPosition = _wonPositions[0];
+			Position endPosition = _wonPositions[_wonPositions.length - 1];
 			
-			RectF finalRect = new RectF(start);
-			finalRect.union(end);
+			RectF startRect = _positionToFieldMap.get(startPosition);
+			RectF endRect = _positionToFieldMap.get(endPosition);
+			
+			RectF finalRect = new RectF(startRect);
+			finalRect.union(endRect);
 			float finalHeight = finalRect.height();
 			float finalWidth = finalRect.width();
 			float startX, startY, stopX, stopY;
 			 
-			if ( finalHeight == finalWidth ) 							
-				if (start.centerX() < end.centerX()){
+			if (isDiagonal(startPosition, endPosition)) 							
+				if (startRect.centerX() < endRect.centerX()){
 					startX = finalRect.left;
 					startY = finalRect.top;
 					stopX = finalRect.right;
@@ -304,6 +307,14 @@ public final class DrawView extends View {
 	private Boolean hasWonPositions(){
 		return _wonPositions != null;
 	}
+	
+	private boolean isDiagonal(Position start, Position end){
+		int distance = _size - 1;
+		return (Math.abs(start.getColumn() - end.getColumn()) == distance)
+				&& (Math.abs(start.getRow() - end.getRow()) == distance);
+	}
+	
+	
 	
 	private Paint _debugBorderPaint;
 	private Paint _backgroundPaint;
